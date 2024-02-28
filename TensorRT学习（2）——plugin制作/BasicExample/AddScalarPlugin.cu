@@ -42,7 +42,8 @@ AddScalarPlugin::AddScalarPlugin(const std::string &name, const void *buffer, si
     name_(name)
 {
     WHERE_AM_I();
-    memcpy(&m_, buffer, sizeof(m_));
+    memcpy(&m_, buffer, sizeof(m_));    // memcpy: 拷贝内存
+                                        // sizeof: 返回所占字节数
 }
 
 AddScalarPlugin::~AddScalarPlugin()
@@ -202,8 +203,8 @@ void AddScalarPlugin::detachFromContext() noexcept
 }
 
 // class AddScalarPluginCreator
-PluginFieldCollection    AddScalarPluginCreator::fc_ {};
-std::vector<PluginField> AddScalarPluginCreator::attr_;
+PluginFieldCollection    AddScalarPluginCreator::fc_ {};    // 初始化成员变量        PluginFieldCollection  fc_；
+std::vector<PluginField> AddScalarPluginCreator::attr_;     // vector< > 指定类型的 list
 
 AddScalarPluginCreator::AddScalarPluginCreator()
 {

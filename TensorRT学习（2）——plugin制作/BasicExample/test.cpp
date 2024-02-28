@@ -3,7 +3,13 @@
 #include<iostream>
 
 
+struct test_struct
+{
+    int i;
+    std::string  name = " Strive-G";
+};
 
+test_struct t_struct  {};
 
 #include "./AddScalarPlugin.h"
  
@@ -25,7 +31,13 @@ int main(int argc, char const *argv[])
     // printf(" %d \n", b);
     
     WHERE_AM_I();
-    
+
+    std::cout<< t_struct.i << "     "  <<t_struct.name << std::endl;
+
+    t_struct.i = 19;
+    t_struct.name = "hello world !!" ;
+
+    std::cout<< t_struct.i << "     "  <<t_struct.name << std::endl;
 
     std::cout << a << std::endl;
     std::cout <<  a << b << std::endl;

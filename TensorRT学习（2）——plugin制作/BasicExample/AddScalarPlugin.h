@@ -15,6 +15,7 @@
  */
 
 #include "../include/cookbookHelper.cuh"
+#include<NvInfer.h>
 
 
 namespace
@@ -75,6 +76,8 @@ protected:
     using nvinfer1::IPluginV2::getWorkspaceSize;
     using nvinfer1::IPluginV2Ext::configurePlugin;
 };
+
+
 
 class AddScalarPluginCreator : public IPluginCreator
 {

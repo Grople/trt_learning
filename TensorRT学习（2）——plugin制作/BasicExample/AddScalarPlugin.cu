@@ -128,8 +128,13 @@ int32_t AddScalarPlugin::enqueue(const PluginTensorDesc *inputDesc, const Plugin
     {
         nElement *= inputDesc[0].dims.d[i];
     }
-    dim3 grid(CEIL_DIVIDE(nElement, 256), 1, 1), block(256, 1, 1);
-    addScalarKernel<<<grid, block, 0, stream>>>(reinterpret_cast<const float *>(inputs[0]), reinterpret_cast<float *>(outputs[0]), m_.scalar, nElement);
+    dim3 grid(CEIL_DIVIDE(nElement, 256), 1, 1),   block(256, 1, 1);
+
+    //   Kernel<<<Dg,Db, Ns, S>>>(param list);
+    //  gird, block,  
+    //  Ns:  用于设置每个block除了静态分配的shared Memory以外，最多能动态分配的shared memory大小，单位为byte。不需要动态分配时该值为0或省略不写。
+    //  S:   cudaStream_t类型的可选参数，初始值为零，表示该核函数处在哪个流之中
+    addScalarKernel<<<grid, block, 0, stream>>>( reinterpret_cast<const float *>(inputs[0]), reinterpret_cast<float *>(outputs[0]), m_.scalar, nElement);
     return 0;
 }
 
@@ -210,9 +215,9 @@ AddScalarPluginCreator::AddScalarPluginCreator()
 {
     WHERE_AM_I();
     attr_.clear();
-    attr_.emplace_back(PluginField("scalar", nullptr, PluginFieldType::kFLOAT32, 1));
+    attr_.emplace_back(PluginField("scalar", nullptr, PluginFieldType::kFLOAT32, 1));    //  vector.emplace_back  在末尾添加一个元素
     fc_.nbFields = attr_.size();
-    fc_.fields   = attr_.data();
+    fc_.fields   = attr_.data();    // vector.data 返回vector所有元素，是一个数组类型
 }
 
 AddScalarPluginCreator::~AddScalarPluginCreator()

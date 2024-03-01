@@ -24,7 +24,7 @@ from cuda import cudart
 soFile = "./AddScalarPlugin.so"
 np.set_printoptions(precision=3, linewidth=200, suppress=True)
 np.random.seed(31193)
-cudart.cudaDeviceSynchronize()
+cudart.cudaDeviceSynchronize()     # GPU 与 cpu 保持同步
 
 def printArrayInformation(x, info="", n=5):
     if 0 in x.shape:
@@ -48,18 +48,22 @@ def check(a, b, weak=False, checkEpsilon=1e-5, info=""):
         res = np.all(a == b)
     maxAbsDiff = np.max(np.abs(a - b))
     meanAbsDiff = np.mean(np.abs(a - b))
+
     maxRelDiff = np.max(np.abs(a - b) / (np.abs(b) + checkEpsilon))
     meanRelDiff = np.mean(np.abs(a - b) / (np.abs(b) + checkEpsilon))
-    res = "%s:%s,MaxAbsDiff=%.2e,MeanAbsDiff=%.2e,MaxRelDiff=%.2e,MeanRelDiff=%.2e," % (info, res, maxAbsDiff, meanAbsDiff, maxRelDiff, meanRelDiff)
+
+    res = "%s:%s,  MaxAbsDiff=%.2e,  MeanAbsDiff=%.2e,  MaxRelDiff=%.2e,  MeanRelDiff=%.2e," % (info, res, maxAbsDiff, meanAbsDiff, maxRelDiff, meanRelDiff)
+
     index = np.argmax(np.abs(a - b))
     valueA, valueB= a.flatten()[index], b.flatten()[index]
+
     shape = a.shape
     indexD = []
     for i in range(len(shape) - 1, -1, -1):
         x = index % shape[i]
         indexD = [x] + indexD
         index = index // shape[i]
-    res += "WorstPair=(%f:%f)at%s" %(valueA, valueB, str(indexD))
+    res += "WorstPair=(%f:%f) at%s" %(valueA, valueB, str(indexD))
     print(res)
     return
 
@@ -67,7 +71,7 @@ def addScalarCPU(inputH, scalar):
     return [inputH[0] + scalar]
 
 def getAddScalarPlugin(scalar):
-    for c in trt.get_plugin_registry().plugin_creator_list:
+    for c in trt.get_plugin_registry().plugin_creator_list:    #  
         #print(c.name)
         if c.name == "AddScalar":
             parameterList = []
@@ -75,7 +79,7 @@ def getAddScalarPlugin(scalar):
             return c.create_plugin(c.name, trt.PluginFieldCollection(parameterList))
     return None
 
-def run(shape, scalar):
+def run(shape, scalar):      
     testCase = "<shape=%s,scalar=%f>" % (shape, scalar)
     trtFile = "./model-Dim%s.plan" % str(len(shape))
     print("Test %s" % testCase)
@@ -100,7 +104,9 @@ def run(shape, scalar):
         config.add_optimization_profile(profile)
 
         pluginLayer = network.add_plugin_v2([inputT0], getAddScalarPlugin(scalar))
-        network.mark_output(pluginLayer.get_output(0))
+
+        network.mark_output(pluginLayer.get_output(0))    # 标记输出
+
         engineString = builder.build_serialized_network(network, config)
         if engineString == None:
             print("Failed building engine!")
@@ -157,12 +163,13 @@ if __name__ == "__main__":
     os.system("rm -rf ./*.plan")
 
     run([32], 1)
-    run([32, 32], 1)
-    run([16, 16, 16], 1)
-    run([8, 8, 8, 8], 1)
-    run([32], 1)
-    run([32, 32], 1)
-    run([16, 16, 16], 1)
-    run([8, 8, 8, 8], 1)
+
+    # run([32, 32], 1)
+    # run([16, 16, 16], 1)
+    # run([8, 8, 8, 8], 1)
+    # run([32], 1)
+    # run([32, 32], 1)
+    # run([16, 16, 16], 1)
+    # run([8, 8, 8, 8], 1)
 
     print("Test all finish!")
